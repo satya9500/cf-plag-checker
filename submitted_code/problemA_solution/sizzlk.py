@@ -1,1 +1,0 @@
-for s in[*open(0)][2::2]:a=*map(int,s.split()),;print(len({abs(x-y)for x in a for y in a})-1)

@@ -3,6 +3,8 @@ require('dotenv').config();
 const fs = require('fs');
 let participants = fs.readFileSync('participants.json');
 participants = JSON.parse(participants).username;
+const fresh = require('./fresh');
+fresh();
 
 const langMap = [
     {
@@ -27,11 +29,11 @@ const langMap = [
     },
     {
         name: 'GNU C++14',
-        extension: 'py'
+        extension: 'cpp'
     },
     {
         name: 'GNU C++17',
-        extension: 'py'
+        extension: 'cpp'
     },
     {
         name: 'JavaScript',
@@ -55,51 +57,43 @@ const findExtension = (codeLanguage) => {
     return 'txt';
 }
 
-const init = async function example() {
+const init = async function example(problem_code) {
     let driver = await new Builder().forBrowser('firefox').build();
     try {
-    //   await driver.get('https://codeforces.com/enter');
-    //   await driver.findElement(By.name('handleOrEmail')).sendKeys(process.env.EMAIL, Key.RETURN);
-    //   await driver.findElement(By.name('password')).sendKeys(process.env.PASSWORD, Key.RETURN);
-    //   let loginBtn = await driver.findElement(By.xpath(`//*[@id="enterForm"]/table/tbody/tr[4]/td/div[1]/input`));
-    //   await driver.executeScript("arguments[0].click();",loginBtn);
-    //   await driver.get(`https://codeforces.com/contest/${process.env.ContestCode}/standings`);
-    // await driver.get(`https://codeforces.com/contest/${process.env.ContestCode}/status/${process.env.Problem}`);
     
     const submissionUrl = [];
 
     for(participant of participants) {
-        await driver.get(`https://codeforces.com/contest/${process.env.ContestCode}/status/${process.env.Problem}`);
-        await (await driver.findElement(By.name("participantSubstring"))).clear();
-        await driver.findElement(By.name("participantSubstring")).sendKeys(participant, Key.RETURN);
-        await driver.get(`https://codeforces.com/contest/${process.env.ContestCode}/status/${process.env.Problem}`);
-        const url = await driver.findElement(By.className(`view-source`)).getAttribute('href');
-        driver.get(url);
-        submissionUrl.push(url);
-        const code = await (await driver.findElement(By.className('prettyprint'))).getText();
-        console.log(code);
-        let codeLanguage = await (await driver.findElement(By.xpath('//*[@id="pageContent"]/div[2]/div[6]/table/tbody/tr[2]/td[4]'))).getText();
-        console.log(codeLanguage);
-        codeLanguage = findExtension(codeLanguage)
-        console.log(codeLanguage);
-        // let createStream = await fs.createWriteStream(`submitted_code/problem${process.env.Problem}_solution/${participant}.${codeLanguage}`);
-        // createStream.end();
-        // let writeStream =  await fs.createWriteStream(`submitted_code/probelm${process.env.Problem}_solution/${participant}.${codeLanguage}`);
-        // writeStream.write(`${code}`);
-        // writeStream.end();
-
-        await fs.writeFile(`submitted_code/problem${process.env.Problem}_solution/${participant}.${codeLanguage}`, code, function (err) {
-            if (err) return console.log(err);
-            console.log('Hello World > helloworld.txt');
-          });
+        try{
+            await driver.get(`https://codeforces.com/contest/${process.env.ContestCode}/status/${problem_code}`);
+            await (await driver.findElement(By.name("participantSubstring"))).clear();
+            await driver.findElement(By.name("participantSubstring")).sendKeys(participant, Key.RETURN);
+            const url = await driver.findElement(By.className(`view-source`)).getAttribute('href');
+            driver.get(url);
+            submissionUrl.push(url);
+            const code = await (await driver.findElement(By.className('prettyprint'))).getText();
+            console.log(code);
+            let codeLanguage = await (await driver.findElement(By.xpath('//*[@id="pageContent"]/div[2]/div[6]/table/tbody/tr[2]/td[4]'))).getText();
+            codeLanguage = findExtension(codeLanguage);
+            const username = await(await driver.findElement(By.className('rated-user'))).getText();
+            
+            fs.writeFile(`submitted_code/problem${problem_code}_solution/${codeLanguage}/${username}.${codeLanguage}`, code, function (err) {
+                if (err) return console.log(err);
+                console.log(`${username}.${codeLanguage}`);
+              });
+        } catch(err) {
+            console.log(err);
+        }
     }
     
     }
     catch(err) {
         console.log(err);
     } finally {
-      // await driver.quit();
+      await driver.quit();
     }
   };
 
-init();
+for(let i=0;i<process.env.Problem;i++) {
+    init(String.fromCharCode('A'.charCodeAt() + i));
+}
