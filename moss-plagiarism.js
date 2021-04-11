@@ -40,7 +40,7 @@ const start = (problem_code) => {
                    // directory appears to be empty
                    console.log('empty');
                } else {
-                exec(`~/cf-plag-checker/moss/moss.pl -l ${element.language} ${dirname}*.${element.extension}`, (err, stdout, stderr) => {
+                exec(`./moss/moss.pl -l ${element.language} ${dirname}*.${element.extension}`, (err, stdout, stderr) => {
                     if (err) {
                       // node couldn't execute the command
                       console.log(err);
