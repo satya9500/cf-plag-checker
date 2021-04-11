@@ -25,6 +25,6 @@ npm i
 npm start
 ```
 + All code will be fetched and saved in submitted_codes folder.
-+ Now run `node moss-plagiarism.js` to get the urls of the plagiarism codes. This process might take some time, please be patient.
++ Now run `node moss-plagiarism.js` to get the urls of the plagiarism codes in moss_urls.json. This process might take some time, please be patient.
 
 Contributions to this project are welcome :)
